@@ -499,7 +499,7 @@ class heat(
         $backend_package = 'python-pysqlite2'
       }
       default: {
-        fail('Unsupported backend configured')
+        warning('Unsupported backend configured, you are on your own')
       }
     }
 

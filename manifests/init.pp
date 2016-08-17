@@ -57,6 +57,10 @@
 # [*rabbit_use_ssl*]
 #   (Optional) Connect over SSL for RabbitMQ.
 #   Defaults to false
+
+# [*rabbit_ha_queues*]
+#   (optional) Use HA queues in RabbitMQ.
+#   Defaults to undef
 #
 # [*kombu_ssl_ca_certs*]
 #   (Optional) SSL certification authority file (valid only if SSL enabled).
@@ -213,6 +217,7 @@ class heat(
   $rabbit_password             = '',
   $rabbit_virtual_host         = '/',
   $rabbit_use_ssl              = false,
+  $rabbit_ha_queues            = undef,
   $kombu_ssl_ca_certs          = undef,
   $kombu_ssl_certfile          = undef,
   $kombu_ssl_keyfile           = undef,
@@ -322,11 +327,16 @@ class heat(
       }
     }
 
-    if size($rabbit_hosts) > 1 {
-      heat_config { 'oslo_messaging_rabbit/rabbit_ha_queues': value => true }
+    if $rabbit_ha_queues == undef {
+      if size($rabbit_hosts) > 1 {
+        heat_config { 'oslo_messaging_rabbit/rabbit_ha_queues': value => true }
+      } else {
+        heat_config { 'oslo_messaging_rabbit/rabbit_ha_queues': value => false }
+      }
     } else {
-      heat_config { 'oslo_messaging_rabbit/rabbit_ha_queues': value => false }
+      heat_config { 'oslo_messaging_rabbit/rabbit_ha_queues': value => $rabbit_ha_queues }
     }
+
 
     heat_config {
       'oslo_messaging_rabbit/rabbit_userid'          : value => $rabbit_userid;
